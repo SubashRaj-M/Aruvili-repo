@@ -1,0 +1,31 @@
+FROM python:3.10-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    wget \
+    mariadb-client \
+    default-libmysqlclient-dev \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy build script
+COPY build.sh /app/build.sh
+RUN chmod +x /app/build.sh
+
+# Install Python dependencies
+RUN pip install --upgrade pip && \
+    pip install frappe-bench
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+
+# Expose port
+EXPOSE 8000
+
+# Run build script and start server
+CMD ["/bin/bash", "-c", "./build.sh && cd frappe-bench && bench --site $SITE_NAME serve --host 0.0.0.0 --port $PORT"]

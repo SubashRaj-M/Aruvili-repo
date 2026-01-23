@@ -12,6 +12,12 @@ import { FrappeUI, setConfig, frappeRequest, pageMetaPlugin } from 'frappe-ui'
 
 let pinia = createPinia()
 let app = createApp(App)
+
+// Configure API URL if provided via environment variable
+if (import.meta.env.VITE_FRAPPE_API_URL) {
+	setConfig('url', import.meta.env.VITE_FRAPPE_API_URL)
+}
+
 setConfig('resourceFetcher', frappeRequest)
 
 app.use(FrappeUI)

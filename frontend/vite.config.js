@@ -13,7 +13,7 @@ export default defineConfig(async ({ mode }) => {
 		},
 		plugins: [
 			frappeui({
-				frappeProxy: true,
+				frappeProxy: !process.env.VITE_FRAPPE_API_URL,
 				lucideIcons: true,
 				jinjaBootData: true,
 				buildConfig: {

@@ -1,0 +1,60 @@
+services:
+  - type: web
+    name: frappe-lms-backend
+    env: python
+    plan: starter
+    buildCommand: |
+      pip install --upgrade pip
+      pip install frappe-bench
+      bench init --skip-redis-config-check --skip-mariadb-setup --frappe-branch version-15 frappe-bench
+      cd frappe-bench
+      bench get-app lms https://github.com/frappe/lms
+      bench new-site $SITE_NAME --no-mariadb-socket --admin-password $ADMIN_PASSWORD --db-host $DB_HOST --db-port $DB_PORT --db-name $DB_NAME --db-username $DB_USERNAME --db-password $DB_PASSWORD
+      bench --site $SITE_NAME install-app lms
+      bench build --app lms
+    startCommand: |
+      cd frappe-bench
+      bench --site $SITE_NAME serve --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: SITE_NAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DB_HOST
+        fromDatabase:
+          name: frappe-lms-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: frappe-lms-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: frappe-lms-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: frappe-lms-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: frappe-lms-db
+          property: password
+      - key: REDIS_URL
+        fromService:
+          name: frappe-lms-redis
+          type: redis
+          property: connectionString
+      - key: PYTHON_VERSION
+        value: 3.10.12
+
+  - type: redis
+    name: frappe-lms-redis
+    plan: starter
+    maxmemoryPolicy: allkeys-lru
+
+  - type: pspg
+    name: frappe-lms-db
+    plan: starter
+    databaseName: frappe_lms
+    user: frappe_user

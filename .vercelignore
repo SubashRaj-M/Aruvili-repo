@@ -1,0 +1,16 @@
+lms/
+docker/
+cypress/
+.github/
+*.md
+.gitignore
+.gitmodules
+.pre-commit-config.yaml
+.releaserc
+commitlint.config.js
+crowdin.yml
+pyproject.toml
+setup.py
+MANIFEST.in
+license.txt
+yarn-error.log

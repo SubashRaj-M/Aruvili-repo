@@ -53,7 +53,7 @@ services:
     plan: starter
     maxmemoryPolicy: allkeys-lru
 
-  - type: pspg
+  - type: postgres
     name: frappe-lms-db
     plan: starter
     databaseName: frappe_lms

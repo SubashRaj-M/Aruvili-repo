@@ -32,7 +32,7 @@ services:
   # using type: pserv prevents the "unknown type" error
   - type: pserv
     name: lms-mariadb
-    env: docker
+    env: image
     plan: starter
     image: mariadb:10.6
     disk:
@@ -53,6 +53,6 @@ services:
   # using type: pserv bypasses the "IP allow list" requirement
   - type: pserv
     name: lms-redis
-    env: docker
+    env: image
     plan: starter
     image: redis:7-alpine

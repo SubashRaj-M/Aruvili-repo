@@ -1,60 +1,58 @@
 services:
+  # 1. The Web Server (Frappe LMS)
   - type: web
-    name: frappe-lms-backend
-    env: python
+    name: lms-web
+    env: docker
     plan: starter
-    buildCommand: |
-      pip install --upgrade pip
-      pip install frappe-bench
-      bench init --skip-redis-config-check --skip-mariadb-setup --frappe-branch version-15 frappe-bench
-      cd frappe-bench
-      bench get-app lms https://github.com/frappe/lms
-      bench new-site $SITE_NAME --no-mariadb-socket --admin-password $ADMIN_PASSWORD --db-host $DB_HOST --db-port $DB_PORT --db-name $DB_NAME --db-username $DB_USERNAME --db-password $DB_PASSWORD
-      bench --site $SITE_NAME install-app lms
-      bench build --app lms
-    startCommand: |
-      cd frappe-bench
-      bench --site $SITE_NAME serve --host 0.0.0.0 --port $PORT
+    dockerfilePath: ./render/Dockerfile
+    autoDeploy: true
+    disk:
+      name: bench-data
+      mountPath: /workspace/bench
+      sizeGB: 10
     envVars:
       - key: SITE_NAME
-        sync: false
+        value: lms.onrender.com
       - key: ADMIN_PASSWORD
-        sync: false
-      - key: DB_HOST
-        fromDatabase:
-          name: frappe-lms-db
-          property: host
-      - key: DB_PORT
-        fromDatabase:
-          name: frappe-lms-db
-          property: port
-      - key: DB_NAME
-        fromDatabase:
-          name: frappe-lms-db
-          property: database
-      - key: DB_USERNAME
-        fromDatabase:
-          name: frappe-lms-db
-          property: user
-      - key: DB_PASSWORD
-        fromDatabase:
-          name: frappe-lms-db
-          property: password
-      - key: REDIS_URL
-        fromService:
-          name: frappe-lms-redis
-          type: redis
-          property: connectionString
-      - key: PYTHON_VERSION
-        value: 3.10.12
+        value: MPSD2002
+      - key: MYSQL_HOST
+        value: lms-mariadb
+      - key: MYSQL_DATABASE
+        value: lms
+      - key: MYSQL_USER
+        value: lms
+      - key: MYSQL_PASSWORD
+        value: MPSD2002
+      - key: MYSQL_ROOT_PASSWORD
+        value: MPSD2002
+      - key: REDIS_HOST
+        value: lms-redis
 
-  - type: redis
-    name: frappe-lms-redis
+  # 2. The Database (MariaDB - Private Service)
+  # using type: pserv prevents the "unknown type" error
+  - type: pserv
+    name: lms-mariadb
+    env: docker
     plan: starter
-    maxmemoryPolicy: allkeys-lru
+    image: mariadb:10.6
+    disk:
+      name: mariadb-data
+      mountPath: /var/lib/mysql
+      sizeGB: 10
+    envVars:
+      - key: MYSQL_ROOT_PASSWORD
+        value: MPSD2002
+      - key: MYSQL_DATABASE
+        value: lms
+      - key: MYSQL_USER
+        value: lms
+      - key: MYSQL_PASSWORD
+        value: MPSD2002
 
-databases:
-  - name: frappe-lms-db
+  # 3. The Cache (Redis - Private Service)
+  # using type: pserv bypasses the "IP allow list" requirement
+  - type: pserv
+    name: lms-redis
+    env: docker
     plan: starter
-    databaseName: frappe_lms
-    user: frappe_user
+    image: redis:7-alpine

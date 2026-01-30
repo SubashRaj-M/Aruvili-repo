@@ -52,7 +52,7 @@ services:
   # 3. The Cache (Redis - Private Service)
   # using type: pserv bypasses the "IP allow list" requirement
   - type: pserv
-name: lms-redis
+    name: lms-redis
 	#env: image
 	env: docker
     plan: starter

@@ -1,5 +1,5 @@
 services:
-  # 1. The Web Server (Frappe LMS)
+  # 1. The Web Server
   - type: web
     name: lms-web
     env: docker
@@ -28,13 +28,12 @@ services:
       - key: REDIS_HOST
         value: lms-redis
 
-  # 2. The Database (MariaDB - Private Service)
-  # using type: pserv prevents the "unknown type" error
+  # 2. The Database (MariaDB)
   - type: pserv
     name: lms-mariadb
-    env: image
+    env: docker
     plan: starter
-    image: mariadb:10.6
+    dockerfilePath: ./mariadb.Dockerfile
     disk:
       name: mariadb-data
       mountPath: /var/lib/mysql
@@ -49,12 +48,9 @@ services:
       - key: MYSQL_PASSWORD
         value: MPSD2002
 
-  # 3. The Cache (Redis - Private Service)
-  # using type: pserv bypasses the "IP allow list" requirement
+  # 3. The Cache (Redis)
   - type: pserv
     name: lms-redis
-	#env: image
-	env: docker
+    env: docker
     plan: starter
-	#image: redis:7-alpine
-	dockerfilePath: ./redis.Dockerfile
+    dockerfilePath: ./redis.Dockerfile
